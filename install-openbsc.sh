@@ -14,7 +14,7 @@ echo "deb https://download.opensuse.org/repositories/network:/osmocom:/latest/$O
 
 apt-get update && apt-get install -y uhd-host
 
-PACKAGES_2G="osmo-hlr osmo-msc osmo-mgw osmo-stp osmo-bsc osmo-sip-connector"
+PACKAGES_2G="osmo-hlr osmo-msc osmo-mgw osmo-stp osmo-bsc osmo-sip-connector osmo-trx osmo-trx-uhd"
 PACKAGES=$PACKAGES_2G
 
 apt-get install -y $PACKAGES
@@ -26,3 +26,6 @@ set -ex
 systemctl \$cmd $PACKAGES
 EOF
 chmod +x /root/osmo-all.sh
+
+uhd_images_downloader
+
