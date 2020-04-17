@@ -12,20 +12,30 @@ curl https://download.opensuse.org/repositories/network:/osmocom:/latest/$OSVERS
 echo "deb https://download.opensuse.org/repositories/network:/osmocom:/latest/$OSVERSION/ ./" > /etc/apt/sources.list.d/osmocom-latest.list
 
 
-apt-get update && apt-get install -y uhd-host
+apt-get update && apt-get install -y uhd-host supervisor
 
-PACKAGES_2G="osmo-hlr osmo-msc osmo-mgw osmo-stp osmo-bsc osmo-sip-connector osmo-trx osmo-trx-uhd"
-PACKAGES=$PACKAGES_2G
+OPTIONAL="osmo-hlr osmo-msc osmo-mgw osmo-stp osmo-sip-connector"
+REQUIRED="osmo-trx-uhd osmo-bts-trx osmo-bsc"
 
-apt-get install -y $PACKAGES
+apt-get install -y $REQUIRED
 
-cat > /root/osmo-all.sh <<EOF
-#!/bin/sh
-cmd="\${1:-status}"
-set -ex
-systemctl \$cmd $PACKAGES
+
+
+sed -i 's,oml remote-ip .*,oml remote-ip 127.0.0.4,' /etc/osmocom/osmo-bts-trx.cfg
+
+cat > /etc/supervisor/conf.d/osmo-all.conf <<EOF
+[program:osmo-trx-uhd]
+command=/usr/bin/osmo-trx-uhd -C /etc/osmocom/osmo-trx-uhd.cfg
+
+[program:osmo-bts-trx]
+command=/usr/bin/osmo-bts-trx -c /etc/osmocom/osmo-bts-trx.cfg
+
+[program:osmo-bsc]
+command=/usr/bin/osmo-bsc -c /etc/osmocom/osmo-bsc.cfg
 EOF
-chmod +x /root/osmo-all.sh
+
+# This will only trigger outside a Docker container
+test -e /usr/bin/systemctl && /usr/bin/systemctl restart supervisor
 
 uhd_images_downloader
 

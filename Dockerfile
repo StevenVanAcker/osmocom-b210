@@ -5,3 +5,4 @@ COPY install-openbsc.sh /opt
 RUN chmod +x /opt/install-openbsc.sh
 RUN /opt/install-openbsc.sh
 
+CMD /usr/bin/supervisord -n
